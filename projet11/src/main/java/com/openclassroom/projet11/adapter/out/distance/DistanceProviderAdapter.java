@@ -7,8 +7,9 @@ import com.openclassroom.projet11.domain.port.out.DistanceProviderPort;
 import org.springframework.stereotype.Component;
 
 /**
- * Adaptateur pour le fournisseur de distance OpenRouteService.
  * DistanceProviderAdapter
+ * Adaptateur pour le fournisseur de distance OpenRouteService.
+ * @param client client OpenRouteService pour calculer les itinéraires
  */
 @Component
 public class DistanceProviderAdapter implements DistanceProviderPort {
@@ -19,6 +20,13 @@ public class DistanceProviderAdapter implements DistanceProviderPort {
         this.client = client;
     }
 
+    /**
+     * Calcule la distance entre deux localisations.
+     * 
+     * @param localisationPatient localisation du patient
+     * @param localisationHopital localisation de l'hôpital 
+     * @return distance en kilomètres
+     */
      @Override
     public double calculerDistance(Location localisationPatient, Location localisationHopital) {
 
@@ -38,6 +46,12 @@ public class DistanceProviderAdapter implements DistanceProviderPort {
                 / 1000.0;
     }
 
+    /**
+     * Calcule le temps de trajet entre deux localisations.
+     * @param localisationPatient localisation du patient
+     * @param localisationHopital localisation de l'hôpital
+     * @return durée du trajet en minutes
+    */
     @Override
     public double calculerTempsTrajet(Location localisationPatient, Location localisationHopital) {
 

@@ -140,7 +140,7 @@ INSERT INTO hopital (
 (1,'Hôpital Pitié-Salpêtrière','47-83 Boulevard de l''Hôpital, 75013 Paris',48.8383,2.3651,25),
 (2,'Hôpital Européen Georges-Pompidou','20 Rue Leblanc, 75015 Paris',48.8399,2.2728,18),
 (3,'Hôpital Necker-Enfants malades','149 Rue de Sèvres, 75015 Paris',48.8462,2.3150,12),
-(4,'Hôpital Cochin','27 Rue du Faubourg Saint-Jacques, 75014 Paris',48.8397,2.3386,15),
+(4,'Hôpital Cochin','27 Rue du Faubourg Saint-Jacques, 75014 Paris',48.8397,2.3386,0),
 (5,'Hôpital Saint-Louis','1 Avenue Claude Vellefaux, 75010 Paris',48.8763,2.3697,10),
 (6,'Hôpital Lariboisière','2 Rue Ambroise Paré, 75010 Paris',48.8807,2.3553,9),
 (7,'Hôpital Bichat-Claude Bernard','46 Rue Henri Huchard, 75018 Paris',48.8993,2.3299,16),
