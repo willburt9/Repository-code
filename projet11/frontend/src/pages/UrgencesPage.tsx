@@ -27,8 +27,8 @@ import type { GroupeSpecialiteResponse, RecommandationResponse } from "../types/
 
 export function UrgencesPage() {
   const [groupes, setGroupes] = useState<GroupeSpecialiteResponse[]>([]);
-  const [latitude, setLatitude] = useState("48.8566");
-  const [longitude, setLongitude] = useState("2.3522");
+  const [latitude, setLatitude] = useState("48.86056");
+  const [longitude, setLongitude] = useState("2.3367934");
   const [specialiteId, setSpecialiteId] = useState<number | "">("");
 
   const [recherche, setRecherche] = useState(false);
@@ -105,7 +105,7 @@ export function UrgencesPage() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
-        Orientation urgences
+        Urgences
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
         Identifiez rapidement l'hôpital le mieux adapté pour votre patient

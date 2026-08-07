@@ -4,7 +4,7 @@ import { frFR as dataGridFrFR } from "@mui/x-data-grid/locales";
 
 // Palette et tokens définis par le cahier de charge du front (MedDispatch).
 const palette = {
-  primary: "#1976D2", // Medical Blue
+  primary: "#024D85", // MedHead Blue
   secondary: "#26A69A", // Teal
   success: "#2E7D32",
   warning: "#ED6C02",

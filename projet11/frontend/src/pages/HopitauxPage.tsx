@@ -107,9 +107,6 @@ export function HopitauxPage() {
       <Stack direction="row" sx={{ mb: 1, justifyContent:"space-between", alignItems:"center"}}>
         <Typography variant="h4">Annuaire des hôpitaux</Typography>
       </Stack>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        {stats.total} établissements
-      </Typography>
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, sm: 4 }}>

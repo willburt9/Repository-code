@@ -3,27 +3,23 @@ import { NavLink, useLocation } from "react-router-dom";
 import {
   AppBar,
   Avatar,
-  Badge,
   Box,
   Drawer,
   IconButton,
-  InputAdornment,
   List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   Menu,
   MenuItem,
-  TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
 import EmergencyIcon from "@mui/icons-material/EmergencyShareRounded";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospitalRounded";
-import SearchIcon from "@mui/icons-material/SearchRounded";
-import DarkModeIcon from "@mui/icons-material/DarkModeRounded";
 import NotificationsIcon from "@mui/icons-material/NotificationsRounded";
 import AddCircleIcon from "@mui/icons-material/AddCircleRounded";
+import logo from "../assets/logo.png";
 
 const DRAWER_WIDTH = 240;
 
@@ -49,13 +45,13 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         <Toolbar sx={{ gap: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 200 }}>
-            <AddCircleIcon color="primary" fontSize="large" />
+            <img src={logo} alt="Logo" width={48} height={32} />
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: "700", lineHeight: "1.1" }} color="primary">
-                MedDispatch
+                Med<span style={{ fontWeight: "900"}}>Head</span>
               </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ letterSpacing:"0.5"}}>
-                SAMU · URGENCES
+              <Typography variant="caption" color="text.secondary" sx={{ letterSpacing:"0.8px", fontWeight:"600"}}>
+                URGENCES
               </Typography>
             </Box>
           </Box>
@@ -63,10 +59,8 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           <Box sx={{ flexGrow: 1 }} />
 
-          <IconButton>
-            <Badge badgeContent={2} color="error">
+          <IconButton> 
               <NotificationsIcon />
-            </Badge>
           </IconButton>
 
           <Box
