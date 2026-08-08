@@ -42,3 +42,6 @@ start-dev.bat
 ### VS Code ###
 .vscode/
 .vscode/launch.json
+
+### Logs ###
+logs/

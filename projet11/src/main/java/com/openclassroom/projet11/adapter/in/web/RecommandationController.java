@@ -1,6 +1,7 @@
 package com.openclassroom.projet11.adapter.in.web;
 
 import com.openclassroom.projet11.adapter.in.web.dto.RecommandationResponse;
+import com.openclassroom.projet11.adapter.out.logging.AuditLog;
 import com.openclassroom.projet11.application.port.in.RecommandationResultat;
 import com.openclassroom.projet11.application.port.in.RecommanderHopitalUseCase;
 import com.openclassroom.projet11.domain.model.Location;
@@ -36,8 +37,17 @@ public class RecommandationController {
             @RequestParam double longitude,
             @RequestParam Long specialiteId) {
 
+        AuditLog.LOGGER.info("event=recommandation.demande latitude={} longitude={} specialiteId={}",
+                latitude, longitude, specialiteId);
+                
         Location localisationPatient = new Location(latitude, longitude);   // 400 si coordonnées invalides
         RecommandationResultat resultat = recommanderHopitalUseCase.recommander(localisationPatient, specialiteId);
+
+         AuditLog.LOGGER.info(
+                "event=recommandation.resultat hopitalId={} nom=\"{}\" distanceKm={} dureeMinutes={}",
+                resultat.hopital().getId(), resultat.hopital().getNom(),
+                resultat.distanceKm(), resultat.dureeMinutes());
+                
         return RecommandationResponse.from(resultat);
     }
 }

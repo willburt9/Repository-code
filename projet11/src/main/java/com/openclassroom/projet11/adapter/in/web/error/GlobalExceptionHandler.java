@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.openclassroom.projet11.adapter.out.logging.AuditLog;
 import com.openclassroom.projet11.domain.exception.BusinessException;
 
 /**
@@ -24,18 +25,25 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ErrorResponse> handleBusinessException(
                 BusinessException exception) {
 
-
-        ErrorResponse response =
-                new ErrorResponse(
-                        HttpStatus.NOT_FOUND.value(),
+                        
+                AuditLog.LOGGER.warn("event=erreur type={} code={} status={} message=\"{}\"",
+                        exception.getClass().getSimpleName(),
                         exception.getCode(),
-                        exception.getMessage()
-                );
+                        exception.getStatus().value(),
+                        exception.getMessage());
+ 
+
+                ErrorResponse response =
+                        new ErrorResponse(
+                                exception.getStatus().value(),
+                                exception.getCode(),
+                                exception.getMessage()
+                        );
 
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(response);
+                return ResponseEntity
+                        .status(exception.getStatus())
+                        .body(response);
         }
 
 
@@ -47,6 +55,11 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
                 IllegalArgumentException exception) {
 
+                        
+                AuditLog.LOGGER.warn("event=erreur type={} status={} message=\"{}\"",
+                        exception.getClass().getSimpleName(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        exception.getMessage());
 
                 ErrorResponse response =
                         new ErrorResponse(
