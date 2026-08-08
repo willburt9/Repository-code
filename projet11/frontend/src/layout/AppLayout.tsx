@@ -18,7 +18,6 @@ import {
 import EmergencyIcon from "@mui/icons-material/EmergencyShareRounded";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospitalRounded";
 import NotificationsIcon from "@mui/icons-material/NotificationsRounded";
-import AddCircleIcon from "@mui/icons-material/AddCircleRounded";
 import logo from "../assets/logo.png";
 
 const DRAWER_WIDTH = 240;
