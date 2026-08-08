@@ -46,9 +46,11 @@ export function UrgencesPage() {
 
   const specialiteOptions = useMemo(
     () =>
-      groupes.flatMap((groupe) =>
-        groupe.specialites.map((s) => ({ ...s, groupeNom: groupe.nom }))
-      ),
+      groupes
+        .flatMap((groupe) =>
+          groupe.specialites.map((s) => ({ ...s, groupeNom: groupe.nom }))
+        )
+        .sort((a, b) => a.nom.localeCompare(b.nom, "fr")),
     [groupes]
   );
 

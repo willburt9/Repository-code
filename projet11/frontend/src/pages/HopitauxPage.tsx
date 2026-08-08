@@ -26,8 +26,12 @@ import type { HopitalResponse } from "../types/api";
 function SpecialitesCell({ specialites }: { specialites: string[] }) {
   const [etendu, setEtendu] = useState(false);
   const SEUIL = 3;
-  const nombreCachees = specialites.length - SEUIL;
-  const visibles = etendu ? specialites : specialites.slice(0, SEUIL);
+  const specialitesTriees = useMemo(
+    () => [...specialites].sort((a, b) => a.localeCompare(b, "fr")),
+    [specialites]
+  );
+  const nombreCachees = specialitesTriees.length - SEUIL;
+  const visibles = etendu ? specialitesTriees : specialitesTriees.slice(0, SEUIL);
 
   return (
     <Stack direction="row" sx={{ rowGap: 1, columnGap: 1, flexWrap: "wrap" }}>
