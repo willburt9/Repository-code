@@ -18,6 +18,38 @@ import { fetchHopitaux } from "../api/hopitaux";
 import { ApiError } from "../api/client";
 import type { HopitalResponse } from "../types/api";
 
+
+/**
+ * Cellule "Spécialités" : affiche les 3 premières, et un chip "+N" cliquable
+ * pour déplier le reste. L'état d'expansion est local à chaque cellule.
+ */
+function SpecialitesCell({ specialites }: { specialites: string[] }) {
+  const [etendu, setEtendu] = useState(false);
+  const SEUIL = 3;
+  const nombreCachees = specialites.length - SEUIL;
+  const visibles = etendu ? specialites : specialites.slice(0, SEUIL);
+
+  return (
+    <Stack direction="row" sx={{ rowGap: 1, columnGap: 1, flexWrap: "wrap" }}>
+      {visibles.map((s) => (
+        <Chip key={s} size="small" label={s} variant="outlined" />
+      ))}
+      {nombreCachees > 0 && (
+        <Chip
+          size="small"
+          label={etendu ? "Réduire" : `+${nombreCachees}`}
+          color="primary"
+          onClick={(event) => {
+            event.stopPropagation(); // évite de déclencher la sélection de ligne
+            setEtendu((valeur) => !valeur);
+          }}
+          sx={{ cursor: "pointer" }}
+        />
+      )}
+    </Stack>
+  );
+}
+
 const columns: GridColDef<HopitalResponse>[] = [
   { field: "nom", headerName: "Nom", flex: 1.4, minWidth: 220 },
   { field: "adresse", headerName: "Adresse", flex: 2, minWidth: 260 },
@@ -39,16 +71,7 @@ const columns: GridColDef<HopitalResponse>[] = [
     flex: 2,
     minWidth: 280,
     sortable: false,
-    renderCell: (params) => (
-      <Stack   direction="row"  sx={{ py: 0.5, flexWrap:"wrap", gap: 0.5 }}>
-        {(params.value as string[]).slice(0, 3).map((s) => (
-          <Chip key={s} size="small" label={s} variant="outlined" />
-        ))}
-        {(params.value as string[]).length > 3 && (
-          <Chip size="small" label={`+${(params.value as string[]).length - 3}`} />
-        )}
-      </Stack>
-    ),
+    renderCell: (params) => <SpecialitesCell specialites={params.value as string[]} />,
   },
 ];
 
@@ -153,6 +176,8 @@ export function HopitauxPage() {
           columns={columns}
           loading={chargement}
           getRowId={(row) => row.id}
+          getRowHeight={() => "auto"}
+          getEstimatedRowHeight={() => 100}
           slots={{ toolbar: GridToolbarAvecRecherche }}
           initialState={{
             pagination: { paginationModel: { pageSize: 10 } },
@@ -163,6 +188,11 @@ export function HopitauxPage() {
             border: "none",
             "--DataGrid-overlayHeight": "300px",
             "& .MuiDataGrid-columnHeaders": { bgcolor: "grey.50" },
+            "& .MuiDataGrid-cell": {
+              display: "flex",
+              alignItems: "center",
+              py: 1.25,
+            },
           }}
         />
       </Card>
