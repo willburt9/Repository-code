@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.RestClientException;
 
 import com.openclassroom.projet11.adapter.out.logging.AuditLog;
 import com.openclassroom.projet11.domain.exception.BusinessException;
@@ -13,6 +14,11 @@ import com.openclassroom.projet11.domain.exception.BusinessException;
  *
  * Toutes les exceptions non traitées
  * par les contrôleurs passent ici.
+ * <p>
+ * Chaque exception est journalisée dans le log d'audit ("AUDIT"), y compris
+ * les échecs (pas seulement les succès déjà logués dans les contrôleurs) :
+ * sans ça, une panne du fournisseur de distance externe (OpenRouteService)
+ * restait invisible dans les journaux métier.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -20,18 +26,19 @@ public class GlobalExceptionHandler {
 
         /**
          * Gestion des erreurs métier générales.
+         * <p>
+         * Utilise le statut HTTP porté par l'exception elle-même
+         * (exception.getStatus()) plutôt qu'un statut fixe.
          */
         @ExceptionHandler(BusinessException.class)
         public ResponseEntity<ErrorResponse> handleBusinessException(
                 BusinessException exception) {
 
-                        
                 AuditLog.LOGGER.warn("event=erreur type={} code={} status={} message=\"{}\"",
                         exception.getClass().getSimpleName(),
                         exception.getCode(),
                         exception.getStatus().value(),
                         exception.getMessage());
- 
 
                 ErrorResponse response =
                         new ErrorResponse(
@@ -40,12 +47,10 @@ public class GlobalExceptionHandler {
                                 exception.getMessage()
                         );
 
-
                 return ResponseEntity
                         .status(exception.getStatus())
                         .body(response);
         }
-
 
 
         /**
@@ -55,7 +60,6 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
                 IllegalArgumentException exception) {
 
-                        
                 AuditLog.LOGGER.warn("event=erreur type={} status={} message=\"{}\"",
                         exception.getClass().getSimpleName(),
                         HttpStatus.BAD_REQUEST.value(),
@@ -68,11 +72,66 @@ public class GlobalExceptionHandler {
                                 exception.getMessage()
                         );
 
-
                 return ResponseEntity
                         .status(HttpStatus.BAD_REQUEST)
                         .body(response);
         }
 
+
+        /**
+         * Panne du fournisseur de distance externe (OpenRouteService injoignable,
+         * timeout, erreur HTTP non 2xx...). Le message technique n'est jamais
+         * renvoyé tel quel au client (il pourrait révéler des détails internes) ;
+         * il est journalisé côté serveur pour investigation.
+         */
+        @ExceptionHandler(RestClientException.class)
+        public ResponseEntity<ErrorResponse> handleRestClientException(
+                RestClientException exception) {
+
+                AuditLog.LOGGER.error("event=erreur type={} status={} message=\"{}\"",
+                        exception.getClass().getSimpleName(),
+                        HttpStatus.SERVICE_UNAVAILABLE.value(),
+                        exception.getMessage());
+
+                ErrorResponse response =
+                        new ErrorResponse(
+                                HttpStatus.SERVICE_UNAVAILABLE.value(),
+                                "DISTANCE_PROVIDER_UNAVAILABLE",
+                                "Le service de calcul d'itinéraire est temporairement indisponible. Réessayez dans quelques instants."
+                        );
+
+                return ResponseEntity
+                        .status(HttpStatus.SERVICE_UNAVAILABLE)
+                        .body(response);
+        }
+
+
+        /**
+         * Filet de sécurité final : toute exception non prévue ci-dessus
+         * (bug, état inattendu comme "Aucun itinéraire trouvé"...) est
+         * capturée ici plutôt que de remonter en Whitelabel Error Page.
+         * Le détail technique reste uniquement dans le log serveur, jamais
+         * dans la réponse HTTP (évite une fuite d'information interne).
+         */
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ErrorResponse> handleGenericException(
+                Exception exception) {
+
+                AuditLog.LOGGER.error("event=erreur type={} status={} message=\"{}\"",
+                        exception.getClass().getSimpleName(),
+                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        exception.getMessage());
+
+                ErrorResponse response =
+                        new ErrorResponse(
+                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                "INTERNAL_ERROR",
+                                "Une erreur interne inattendue est survenue."
+                        );
+
+                return ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(response);
+        }
 
 }

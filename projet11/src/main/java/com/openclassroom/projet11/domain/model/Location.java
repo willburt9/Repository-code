@@ -29,6 +29,17 @@ public record Location(
      */
     public Location {
 
+        /*
+         * Validation des coordonnées GPS.
+         * La latitude et la longitude doivent être des nombres valides (pas NaN).
+         * La latitude doit être comprise entre -90 et 90 degrés.
+         * La longitude doit être comprise entre -180 et 180 degrés.
+         */
+        if (Double.isNaN(latitude) || Double.isNaN(longitude)) {
+            throw new InvalidLocationException(
+                    "La latitude et la longitude doivent être des nombres valides.");
+        }
+
         if (latitude < -90 || latitude > 90) {
             throw new InvalidLocationException(
                     "La latitude doit être comprise entre -90 et 90 degrés.");
