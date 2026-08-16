@@ -38,6 +38,7 @@ start-dev.bat
 
 ### Fichiers de configuration sensibles ###
 .env
+frontend/.env
 
 ### VS Code ###
 .vscode/

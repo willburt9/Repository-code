@@ -1,0 +1,64 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import { HopitauxPage } from "./HopitauxPage";
+import { fetchHopitaux } from "../api/hopitaux";
+
+vi.mock("../api/hopitaux");
+
+const hopitaux = [
+  {
+    id: 1,
+    nom: "Hôpital Bichat",
+    adresse: "46 Rue Henri Huchard, Paris",
+    latitude: 48.86056,
+    longitude: 2.3367934,
+    litsDisponibles: 8,
+    specialites: ["Cardiologie", "Anesthésie"],
+  },
+  {
+    id: 2,
+    nom: "Hôpital Cochin",
+    adresse: "Paris",
+    latitude: 48.86056,
+    longitude: 2.3367934,
+    litsDisponibles: 2,
+    specialites: ["Urologie"],
+  },
+];
+
+beforeEach(() => {
+  vi.mocked(fetchHopitaux).mockResolvedValue(hopitaux);
+});
+
+describe("HopitauxPage", () => {
+  it("affiche les hôpitaux renvoyés par l'API dans la grille", async () => {
+    render(<HopitauxPage />);
+
+    await waitFor(() => expect(screen.getByText("Hôpital Bichat")).toBeInTheDocument());
+    expect(screen.getByText("Hôpital Cochin")).toBeInTheDocument();
+  });
+
+  it("calcule correctement le total de lits disponibles", async () => {
+    render(<HopitauxPage />);
+
+    await waitFor(() => expect(screen.getByText("10")).toBeInTheDocument());
+  });
+
+  it("compte les hôpitaux en alerte (≤ 5 lits)", async () => {
+    render(<HopitauxPage />);
+
+    // Seul "Hôpital Cochin" (2 lits) est en alerte ici -> 1
+    await waitFor(() => {
+      const alertes = screen.getAllByText("1");
+      expect(alertes.length).toBeGreaterThan(0);
+    });
+  });
+
+  it("affiche un message d'erreur si l'appel API échoue", async () => {
+    vi.mocked(fetchHopitaux).mockRejectedValueOnce({ message: "Erreur serveur" });
+
+    render(<HopitauxPage />);
+
+    expect(await screen.findByText("Erreur serveur")).toBeInTheDocument();
+  });
+});

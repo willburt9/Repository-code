@@ -1,9 +1,10 @@
 import axios from "axios";
+import { env } from "../config/env";
 
 // En dev, le backend Spring Boot tourne sur le port 8080, le front Vite sur 5173.
 // Il faut activer le CORS côté backend (adapter/config/CorsConfig.java).
 export const apiClient = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: env.apiBaseUrl,
   headers: { "Content-Type": "application/json" },
 });
 
