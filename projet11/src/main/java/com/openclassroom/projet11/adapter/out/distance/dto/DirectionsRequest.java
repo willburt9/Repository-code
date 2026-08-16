@@ -1,25 +1,63 @@
 package com.openclassroom.projet11.adapter.out.distance.dto;
 
-import java.util.List;
-
 /**
- * Corps de la requête POST /v2/directions/driving-car adressée à OpenRouteService.
+ * Requête utilisée pour construire un appel
+ * GET /route de GraphHopper.
  */
-public record DirectionsRequest(List<List<Double>> coordinates) {
+public class DirectionsRequest {
+
+    private final String pointDepart;
+    private final String pointArrivee;
+    private final String profile;
+    private final String locale;
+
+    private DirectionsRequest(
+            String pointDepart,
+            String pointArrivee,
+            String profile,
+            String locale) {
+
+        this.pointDepart = pointDepart;
+        this.pointArrivee = pointArrivee;
+        this.profile = profile;
+        this.locale = locale;
+    }
 
     /**
-     * @param departLongitude  longitude du point de départ
-     * @param departLatitude   latitude du point de départ
-     * @param arriveeLongitude longitude du point d'arrivée
-     * @param arriveeLatitude  latitude du point d'arrivée
+     * Construit une requête GraphHopper.
+     *
+     * @param longitudeDepart longitude du départ
+     * @param latitudeDepart latitude du départ
+     * @param longitudeArrivee longitude de l'arrivée
+     * @param latitudeArrivee latitude de l'arrivée
      */
     public static DirectionsRequest de(
-            double departLongitude, double departLatitude,
-            double arriveeLongitude, double arriveeLatitude) {
+            double longitudeDepart,
+            double latitudeDepart,
+            double longitudeArrivee,
+            double latitudeArrivee) {
 
-        return new DirectionsRequest(List.of(
-                List.of(departLongitude, departLatitude),
-                List.of(arriveeLongitude, arriveeLatitude)
-        ));
+        return new DirectionsRequest(
+                latitudeDepart + "," + longitudeDepart,
+                latitudeArrivee + "," + longitudeArrivee,
+                "car",
+                "fr"
+        );
+    }
+
+    public String getPointDepart() {
+        return pointDepart;
+    }
+
+    public String getPointArrivee() {
+        return pointArrivee;
+    }
+
+    public String getProfile() {
+        return profile;
+    }
+
+    public String getLocale() {
+        return locale;
     }
 }

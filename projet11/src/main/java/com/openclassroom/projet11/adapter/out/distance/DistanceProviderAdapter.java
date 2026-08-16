@@ -16,17 +16,16 @@ import java.time.Duration;
 @Component
 public class DistanceProviderAdapter implements DistanceProviderPort {
 
-    private final OpenRouteServiceClient client;
+    private final GraphHopperClient client;
     private final RouteCache cache;
 
     /**
-     * @param client            client OpenRouteService pour calculer les itinéraires
-     * @param cacheTtlSeconds   durée de validité (secondes) d'un trajet en cache,
-     *                          pour limiter la consommation du quota ORS
+     * @param client            client GraphHopper pour calculer les itinéraires
+     * @param cacheTtlSeconds   durée de validité (secondes) d'un trajet en cache
      */
     public DistanceProviderAdapter(
-            OpenRouteServiceClient client,
-            @Value("${openrouteservice.cache-ttl-seconds:300}") long cacheTtlSeconds) {
+            GraphHopperClient client,
+            @Value("${graphhopper.cache-ttl-seconds:300}") long cacheTtlSeconds) {
         this.client = client;
         this.cache = new RouteCache(Duration.ofSeconds(cacheTtlSeconds));
     }
@@ -47,11 +46,10 @@ public class DistanceProviderAdapter implements DistanceProviderPort {
         );
 
         /*
-         * ORS retourne la distance en mètres.
+         * GraphHopper retourne la distance en mètres.
          * Conversion en kilomètres.
          */
         return route
-                .getSummary()
                 .getDistance()
                 / 1000.0;
     }
@@ -72,25 +70,19 @@ public class DistanceProviderAdapter implements DistanceProviderPort {
         );
 
         /*
-         * ORS retourne la durée en secondes.
+         * GraphHopper retourne la durée en millisecondes.
          * Conversion en minutes.
          */
         return route
-                .getSummary()
-                .getDuration()
-                / 60.0;
+                .getTime()
+                / 60_000.0;
     }
 
     /**
-     * Appelle OpenRouteService et récupère le premier itinéraire, en passant
+     * Appelle GraphHopper et récupère le premier itinéraire, en passant
      * d'abord par le cache : évite de refaire un appel externe pour une paire
      * départ/arrivée déjà résolue récemment (notamment le doublon entre
      * calculerDistance et calculerTempsTrajet sur le même hôpital retenu).
-     *
-     * <p>
-     * Dans la majorité des cas, ORS retourne un seul itinéraire
-     * optimisé. Le premier élément correspond donc au meilleur trajet.
-     * </p>
      *
      * @param depart  localisation de départ
      * @param arrivee localisation d'arrivée
@@ -116,7 +108,7 @@ public class DistanceProviderAdapter implements DistanceProviderPort {
                 || response.getRoutes().isEmpty()) {
 
             throw new IllegalStateException(
-                    "Aucun itinéraire trouvé par OpenRouteService."
+                    "Aucun itinéraire trouvé par GraphHopper."
             );
         }
 

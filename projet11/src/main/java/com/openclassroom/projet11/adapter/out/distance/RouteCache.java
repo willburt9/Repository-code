@@ -9,16 +9,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Cache mémoire simple pour les résultats OpenRouteService.
+ * Cache mémoire simple pour les résultats GraphHopper.
+ *
  * <p>
- * Protège le quota de l'API tierce : un même trajet demandé plusieurs fois
- * pendant la fenêtre de validité n'est calculé qu'une seule fois. Élimine
- * notamment le doublon d'appel entre {@code calculerDistance} et
- * {@code calculerTempsTrajet} sur la même paire départ/arrivée.
- * <p>
- * Limitation documentée : cache local à l'instance, non partagé entre
- * plusieurs instances de l'application. Suffisant pour la PoC ; à remplacer
- * par un cache distribué (Redis, par ex.) en production multi-instances.
+ * Un même trajet demandé plusieurs fois pendant la durée
+ * de validité n'est calculé qu'une seule fois.
+ * </p>
  */
 class RouteCache {
 
@@ -47,8 +43,6 @@ class RouteCache {
 
     void put(Location depart, Location arrivee, Route route) {
         if (cache.size() >= TAILLE_MAX) {
-            // Éviction grossière (on vide tout) : suffisant pour une PoC à
-            // faible volume ; une vraie LRU serait nécessaire en production.
             cache.clear();
         }
         cache.put(cle(depart, arrivee), new Entree(route, Instant.now().plus(dureeDeVie)));

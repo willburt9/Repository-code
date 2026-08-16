@@ -1,41 +1,36 @@
 package com.openclassroom.projet11.adapter.out.distance.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
- * Représente un itinéraire calculé par OpenRouteService.
- *
- * <p>
- * Pour les besoins de l'application, seule la propriété
- * {@code summary} est exploitée.
- * </p>
+ * Représente un itinéraire retourné par GraphHopper.
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class Route {
 
     /**
-     * Résumé de l'itinéraire.
+     * Distance du trajet en mètres.
      */
-    @JsonProperty("summary")
-    private Summary summary;
+    private double distance;
 
     /**
-     * Retourne le résumé de l'itinéraire.
-     *
-     * @return résumé contenant distance et durée
+     * Durée du trajet en millisecondes.
      */
-    public Summary getSummary() {
-        return summary;
+    private long time;
+
+    public Route() {
     }
 
-    /**
-     * Définit le résumé de l'itinéraire.
-     *
-     * @param summary résumé de l'itinéraire
-     */
-    public void setSummary(Summary summary) {
-        this.summary = summary;
+    public double getDistance() {
+        return distance;
     }
 
+    public void setDistance(double distance) {
+        this.distance = distance;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
 }
