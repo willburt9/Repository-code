@@ -2,6 +2,8 @@ package com.openclassroom.projet11.adapter.in.web.error;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.RestClientException;
@@ -70,6 +72,39 @@ public class GlobalExceptionHandler {
                                 HttpStatus.BAD_REQUEST.value(),
                                 "Bad Request",
                                 exception.getMessage()
+                        );
+
+                return ResponseEntity
+                        .status(HttpStatus.BAD_REQUEST)
+                        .body(response);
+        }
+
+
+        /**
+         * Gestion des erreurs de validation Bean Validation (@Valid sur un
+         * @RequestBody).
+         */
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(
+                MethodArgumentNotValidException exception) {
+
+                String message = exception.getBindingResult()
+                        .getFieldErrors()
+                        .stream()
+                        .findFirst()
+                        .map(FieldError::getDefaultMessage)
+                        .orElse("Requête invalide.");
+
+                AuditLog.LOGGER.warn("event=erreur type={} status={} message=\"{}\"",
+                        exception.getClass().getSimpleName(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        message);
+
+                ErrorResponse response =
+                        new ErrorResponse(
+                                HttpStatus.BAD_REQUEST.value(),
+                                "VALIDATION_ERROR",
+                                message
                         );
 
                 return ResponseEntity
