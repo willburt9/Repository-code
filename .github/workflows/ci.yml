@@ -99,7 +99,7 @@ jobs:
   # CYPRESS
   ############################################################
 
-  cypress:
+    cypress:
     name: Cypress - E2E
     runs-on: ubuntu-latest
 
@@ -108,8 +108,50 @@ jobs:
       - frontend
 
     steps:
+
+      ########################################################
+      # CHECKOUT
+      ########################################################
+
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          lfs: true
+
+
+      ########################################################
+      # GIT LFS
+      ########################################################
+
+      - name: Verify Git LFS
+        run: |
+          echo "===== Git LFS ====="
+          git lfs version
+          git lfs ls-files
+
+
+      ########################################################
+      # VERIFICATION GRAPHHOPPER
+      ########################################################
+
+      - name: Verify GraphHopper files
+        working-directory: projet11/GraphHopper
+        run: |
+          echo "===== GraphHopper directory ====="
+          ls -lh
+
+          echo ""
+          echo "===== OSM file ====="
+          ls -lh ile-de-france-260810.osm.pbf
+
+          echo ""
+          echo "===== File type ====="
+          file ile-de-france-260810.osm.pbf
+
+
+      ########################################################
+      # JAVA 21
+      ########################################################
 
       - name: Setup Java 21
         uses: actions/setup-java@v4
@@ -117,30 +159,31 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+
+      ########################################################
+      # NODE.JS 22
+      ########################################################
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: projet11/frontend/package-lock.json
 
-      - name: Make Maven wrapper executable
-        run: chmod +x projet11/mvnw
+
+      ########################################################
+      # INSTALL FRONTEND DEPENDENCIES
+      ########################################################
 
       - name: Install frontend dependencies
         working-directory: projet11/frontend
         run: npm ci
 
-      ########################################################
-      # GraphHopper
-      ########################################################
 
-      - name: Verify GraphHopper
-        working-directory: projet11
-        run: |
-          echo "===== GraphHopper ====="
-          ls -lh GraphHopper/
-
-          echo "===== OSM file ====="
-          ls -lh GraphHopper/ile-de-france-260810.osm.pbf
+      ########################################################
+      # GRAPHHOPPER
+      ########################################################
 
       - name: Start GraphHopper
         working-directory: projet11/GraphHopper
@@ -156,6 +199,11 @@ jobs:
 
           echo "GraphHopper PID: $(cat ../graphhopper.pid)"
 
+
+      ########################################################
+      # WAIT FOR GRAPHHOPPER
+      ########################################################
+
       - name: Wait for GraphHopper
         working-directory: projet11
         run: |
@@ -163,6 +211,7 @@ jobs:
 
           for i in {1..90}; do
 
+            # Vérifie si le processus Java existe toujours
             if ! kill -0 $(cat graphhopper.pid) 2>/dev/null; then
               echo "❌ GraphHopper s'est arrêté."
               echo ""
@@ -171,13 +220,15 @@ jobs:
               exit 1
             fi
 
+            # Vérifie que l'API répond
             if curl -sf http://localhost:8989/ > /dev/null; then
-              echo "✅ GraphHopper est démarré."
+              echo "✅ GraphHopper est prêt."
               exit 0
             fi
 
             echo "GraphHopper n'est pas encore prêt ($i/90)"
             sleep 2
+
           done
 
           echo "❌ GraphHopper n'a pas démarré après 3 minutes."
@@ -187,61 +238,128 @@ jobs:
 
           exit 1
 
+
       ########################################################
-      # Spring Boot
+      # SPRING BOOT
       ########################################################
 
       - name: Start Spring Boot
         working-directory: projet11
         run: |
+          echo "===== Starting Spring Boot ====="
+
+          chmod +x mvnw
+
           nohup ./mvnw spring-boot:run \
             > backend.log 2>&1 &
 
-      - name: Wait for Spring Boot
-        working-directory: projet11/frontend
-        run: npx wait-on http://localhost:8080/actuator/health
+          echo $! > backend.pid
+
+          echo "Spring Boot PID: $(cat backend.pid)"
+
 
       ########################################################
-      # Frontend
+      # WAIT FOR SPRING BOOT
+      ########################################################
+
+      - name: Wait for Spring Boot
+        working-directory: projet11
+        run: |
+          echo "===== Waiting for Spring Boot on port 8080 ====="
+
+          for i in {1..60}; do
+
+            if ! kill -0 $(cat backend.pid) 2>/dev/null; then
+              echo "❌ Spring Boot s'est arrêté."
+              echo ""
+              echo "===== LOGS SPRING BOOT ====="
+              cat backend.log || true
+              exit 1
+            fi
+
+            if curl -sf http://localhost:8080/actuator/health > /dev/null; then
+              echo "✅ Spring Boot est prêt."
+              exit 0
+            fi
+
+            echo "Spring Boot n'est pas encore prêt ($i/60)"
+            sleep 2
+
+          done
+
+          echo "❌ Spring Boot n'a pas démarré."
+          echo ""
+          echo "===== LOGS SPRING BOOT ====="
+          cat backend.log || true
+
+          exit 1
+
+
+      ########################################################
+      # FRONTEND
       ########################################################
 
       - name: Start frontend
         working-directory: projet11/frontend
         run: |
-          nohup npm run dev -- --host 0.0.0.0 \
-            > frontend.log 2>&1 &
+          echo "===== Starting frontend ====="
 
-      - name: Wait for frontend
-        working-directory: projet11/frontend
-        run: npx wait-on http://localhost:5173
+          nohup npm run dev -- --host 0.0.0.0 \
+            > ../frontend.log 2>&1 &
+
+          echo $! > ../frontend.pid
+
+          echo "Frontend PID: $(cat ../frontend.pid)"
+
 
       ########################################################
-      # Cypress
+      # WAIT FOR FRONTEND
+      ########################################################
+
+      - name: Wait for frontend
+        working-directory: projet11
+        run: |
+          echo "===== Waiting for frontend on port 5173 ====="
+
+          for i in {1..60}; do
+
+            if ! kill -0 $(cat frontend.pid) 2>/dev/null; then
+              echo "❌ Frontend s'est arrêté."
+              echo ""
+              echo "===== LOGS FRONTEND ====="
+              cat frontend.log || true
+              exit 1
+            fi
+
+            if curl -sf http://localhost:5173 > /dev/null; then
+              echo "✅ Frontend est prêt."
+              exit 0
+            fi
+
+            echo "Frontend n'est pas encore prêt ($i/60)"
+            sleep 2
+
+          done
+
+          echo "❌ Frontend n'a pas démarré."
+          echo ""
+          echo "===== LOGS FRONTEND ====="
+          cat frontend.log || true
+
+          exit 1
+
+
+      ########################################################
+      # CYPRESS
       ########################################################
 
       - name: Run Cypress
         working-directory: projet11/frontend
         run: npx cypress run
 
-      ########################################################
-      # Logs
-      ########################################################
-
-      - name: Display application logs
-        if: failure()
-        working-directory: projet11
-        run: |
-          echo "===== GraphHopper ====="
-          cat graphhopper.log || true
-
-          echo "===== Spring Boot ====="
-          cat backend.log || true
-
-          echo "===== Frontend ====="
-          cat frontend/frontend.log || true
 
       ########################################################
-      # Cypress artifacts
+      # CYPRESS SCREENSHOTS
       ########################################################
 
       - name: Upload Cypress screenshots
@@ -250,6 +368,12 @@ jobs:
         with:
           name: cypress-screenshots
           path: projet11/frontend/cypress/screenshots/
+          if-no-files-found: ignore
+
+
+      ########################################################
+      # CYPRESS VIDEOS
+      ########################################################
 
       - name: Upload Cypress videos
         if: always()
@@ -257,3 +381,20 @@ jobs:
         with:
           name: cypress-videos
           path: projet11/frontend/cypress/videos/
+          if-no-files-found: ignore
+
+
+      ########################################################
+      # LOGS
+      ########################################################
+
+      - name: Upload application logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: application-logs
+          path: |
+            projet11/graphhopper.log
+            projet11/backend.log
+            projet11/frontend.log
+          if-no-files-found: ignore
