@@ -2,10 +2,13 @@ name: CI
 
 on:
   push:
+    branches:
+    - main
+    - Develop
   pull_request:
     branches:
-      - main
-      - Develop
+    - main
+    - Develop
 
 jobs:
 
@@ -16,10 +19,6 @@ jobs:
   backend:
     name: Backend - Tests & JaCoCo
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: Projet11
 
     steps:
       - name: Checkout
@@ -42,7 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-report
-          path: Projet11/target/site/jacoco/
+          path: target/site/jacoco/
 
 
   ############################################################
@@ -55,7 +54,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: Projet11/frontend
+        working-directory: frontend
 
     steps:
       - name: Checkout
@@ -66,7 +65,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: Projet11/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -108,14 +107,13 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: Projet11/frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Make Maven wrapper executable
-        working-directory: Projet11
         run: chmod +x mvnw
 
       - name: Install frontend dependencies
-        working-directory: Projet11/frontend
+        working-directory: frontend
         run: npm ci
 
       ########################################################
@@ -123,50 +121,45 @@ jobs:
       ########################################################
 
       - name: Start GraphHopper
-        working-directory: Projet11
         run: |
-          nohup java -jar graphhopper/graphhopper-web-11.0.jar \
-            server graphhopper/config.yml \
+          nohup java -jar GraphHopper/graphhopper-web-11.0.jar \
+            server GraphHopper/config.yml \
             > graphhopper.log 2>&1 &
 
       - name: Wait for GraphHopper
-        working-directory: Projet11/frontend
-        run: npx wait-on http://localhost:8989
+        run: npx --yes wait-on http://localhost:8989
 
       ########################################################
       # Spring Boot
       ########################################################
 
       - name: Start Spring Boot
-        working-directory: Projet11
         run: |
           nohup ./mvnw spring-boot:run \
             > backend.log 2>&1 &
 
       - name: Wait for Spring Boot
-        working-directory: Projet11/frontend
-        run: npx wait-on http://localhost:8080/actuator/health
+        run: npx --yes wait-on http://localhost:8080/actuator/health
 
       ########################################################
-      # React / Vite
+      # Frontend React / Vite
       ########################################################
 
       - name: Start frontend
-        working-directory: Projet11/frontend
+        working-directory: frontend
         run: |
           nohup npm run dev -- --host 0.0.0.0 \
             > frontend.log 2>&1 &
 
       - name: Wait for frontend
-        working-directory: Projet11/frontend
-        run: npx wait-on http://localhost:5173
+        run: npx --yes wait-on http://localhost:5173
 
       ########################################################
       # Cypress
       ########################################################
 
       - name: Run Cypress
-        working-directory: Projet11/frontend
+        working-directory: frontend
         run: npx cypress run
 
       ########################################################
@@ -177,24 +170,28 @@ jobs:
         if: failure()
         run: |
           echo "===== GraphHopper ====="
-          cat Projet11/graphhopper.log || true
+          cat graphhopper.log || true
 
           echo "===== Spring Boot ====="
-          cat Projet11/backend.log || true
+          cat backend.log || true
 
           echo "===== Frontend ====="
-          cat Projet11/frontend/frontend.log || true
+          cat frontend/frontend.log || true
+
+      ########################################################
+      # Cypress artifacts
+      ########################################################
 
       - name: Upload Cypress screenshots
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
-          path: Projet11/frontend/cypress/screenshots/
+          path: frontend/cypress/screenshots/
 
       - name: Upload Cypress videos
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-videos
-          path: Projet11/frontend/cypress/videos/
+          path: frontend/cypress/videos/
