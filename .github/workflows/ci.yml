@@ -1,10 +1,11 @@
 name: CI
-
 on:
   push:
-  - Develop
+    branches:
+      - Develop
   pull_request:
-  - Develop
+    branches:
+      - Develop
 
 jobs:
   backend:
