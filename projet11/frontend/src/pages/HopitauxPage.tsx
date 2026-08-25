@@ -3,17 +3,10 @@ import { Box, Card, CardContent, Chip, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import {
   DataGrid,
-  Toolbar,
-  ToolbarButton,
-  QuickFilter,
-  QuickFilterControl,
-  ColumnsPanelTrigger,
-  FilterPanelTrigger,
   type GridColDef,
 } from "@mui/x-data-grid";
 import BedIcon from "@mui/icons-material/BedRounded";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospitalRounded";
-import SearchIcon from "@mui/icons-material/SearchRounded";
 import { fetchHopitaux } from "../api/hopitaux";
 import { ApiError } from "../api/client";
 import type { HopitalResponse } from "../types/api";
