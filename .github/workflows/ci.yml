@@ -419,31 +419,19 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Vérifier les fichiers npm
-        run: |
-          echo "===== ROOT ====="
-          pwd
-          ls -la
-
-          echo "===== Projet11 ====="
-          ls -la Projet11
-
-          echo "===== package-lock.json ====="
-          ls -la Projet11/package-lock.json
-
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: Projet11/package-lock.json
+          cache-dependency-path: projet11/package-lock.json
 
       - name: Install dependencies
-        working-directory: Projet11
+        working-directory: projet11
         run: npm ci
 
       - name: Semantic Release
-        working-directory: Projet11
+        working-directory: projet11
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
