@@ -79,7 +79,7 @@ const columns: GridColDef<HopitalResponse>[] = [
   },
 ];
 
-function GridToolbarAvecRecherche() {
+/*function GridToolbarAvecRecherche() {
   return (
     <Toolbar >
       <Box sx={{ display: "flex", gap: 1 }}>
@@ -109,7 +109,7 @@ function GridToolbarAvecRecherche() {
       </QuickFilter>
     </Toolbar>
   );
-}
+}*/
 
 export function HopitauxPage() {
   const [hopitaux, setHopitaux] = useState<HopitalResponse[]>([]);
@@ -182,7 +182,6 @@ export function HopitauxPage() {
           getRowId={(row) => row.id}
           getRowHeight={() => "auto"}
           getEstimatedRowHeight={() => 100}
-          slots={{ toolbar: GridToolbarAvecRecherche }}
           initialState={{
             pagination: { paginationModel: { pageSize: 10 } },
           }}

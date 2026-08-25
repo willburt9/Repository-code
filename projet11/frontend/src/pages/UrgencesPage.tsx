@@ -134,6 +134,7 @@ export function UrgencesPage() {
                 fullWidth
                 value={latitude}
                 onChange={(e) => setLatitude(e.target.value)}
+                slotProps={{ htmlInput: { "data-cy": "input-latitude" } }}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 3 }}>
@@ -142,9 +143,10 @@ export function UrgencesPage() {
                 fullWidth
                 value={longitude}
                 onChange={(e) => setLongitude(e.target.value)}
+                slotProps={{ htmlInput: { "data-cy": "input-longitude" } }}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 4 }}>
+            <Grid size={{ xs: 12, sm: 4 }} data-cy="champ-specialite">
               <TextField
                 select
                 label="Spécialité requise"
@@ -180,6 +182,7 @@ export function UrgencesPage() {
                   startIcon={<SearchIcon />}
                   onClick={handleRecherche}
                   disabled={recherche}
+                  data-cy="bouton-rechercher"
                 >
                   Trouver
                 </Button>
@@ -190,7 +193,7 @@ export function UrgencesPage() {
       </Card>
 
       {erreur && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setErreur(null)}>
+        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setErreur(null)} data-cy="alerte-erreur">
           {erreur}
         </Alert>
       )}

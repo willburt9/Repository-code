@@ -26,7 +26,7 @@ export function HospitalResultCard({
   reservationEnCours,
 }: HospitalResultCardProps) {
   return (
-    <Card>
+    <Card data-cy="carte-resultat">
       <CardContent sx={{ p: 3 }}>
         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "flex-start" }}>
           <Box>
@@ -77,6 +77,7 @@ export function HospitalResultCard({
             size="large"
             disabled={reservationEnCours || recommandation.litsDisponibles === 0}
             onClick={onReserver}
+            data-cy="bouton-reserver"
           >
             {reservationEnCours ? "Réservation en cours..." : "Réserver un lit"}
           </Button>

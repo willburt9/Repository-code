@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   AppBar,
@@ -10,8 +10,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Menu,
-  MenuItem,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -33,7 +31,6 @@ interface AppLayoutProps {
 
 export function AppLayout({ children }: AppLayoutProps) {
   const location = useLocation();
-  const [profileAnchor, setProfileAnchor] = useState<HTMLElement | null>(null);
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "background.default" }}>
@@ -64,7 +61,6 @@ export function AppLayout({ children }: AppLayoutProps) {
 
           <Box
             sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }}
-            onClick={(e) => setProfileAnchor(e.currentTarget)}
           >
             <Avatar sx={{ bgcolor: "primary.main", width: 36, height: 36 }}>DR</Avatar>
             <Box sx={{ display: { xs: "none", sm: "block" } }}>
@@ -76,12 +72,6 @@ export function AppLayout({ children }: AppLayoutProps) {
               </Typography>
             </Box>
           </Box>
-          <Menu anchorEl={profileAnchor} open={!!profileAnchor} onClose={() => setProfileAnchor(null)}>
-            <MenuItem onClick={() => setProfileAnchor(null)}>Mon profil</MenuItem>
-            <MenuItem onClick={() => setProfileAnchor(null)}>Paramètres</MenuItem>
-            <MenuItem onClick={() => setProfileAnchor(null)}>Aide &amp; Support</MenuItem>
-            <MenuItem onClick={() => setProfileAnchor(null)}>Se déconnecter</MenuItem>
-          </Menu>
         </Toolbar>
       </AppBar>
 

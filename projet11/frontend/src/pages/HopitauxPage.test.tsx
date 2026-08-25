@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, waitFor, within, cleanup } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { HopitauxPage } from "./HopitauxPage";
 import { fetchHopitaux } from "../api/hopitaux";
 
@@ -60,5 +61,37 @@ describe("HopitauxPage", () => {
     render(<HopitauxPage />);
 
     expect(await screen.findByText("Erreur serveur")).toBeInTheDocument();
+  });
+
+  it("affiche un chip “+N” pour les spécialités au-delà du seuil et permet de les déplier", async () => {
+    vi.mocked(fetchHopitaux).mockResolvedValueOnce([
+      {
+        id: 3,
+        nom: "Hôpital Necker",
+        adresse: "149 Rue de Sèvres, Paris",
+        latitude: 48.846,
+        longitude: 2.3149,
+        litsDisponibles: 6,
+        specialites: ["Pédiatrie", "Cardiologie", "Neurologie", "Urologie", "Anesthésie"],
+      },
+    ]);
+
+    render(<HopitauxPage />);
+
+    await screen.findByText("Hôpital Necker");
+
+    const chipPlus = screen.getByText("+2");
+    expect(chipPlus).toBeInTheDocument();
+    expect(screen.queryByText("Urologie")).not.toBeInTheDocument();
+
+    await userEvent.click(chipPlus);
+
+    expect(screen.getByText("Urologie")).toBeInTheDocument();
+    expect(screen.getByText("Réduire")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByText("Réduire"));
+
+    expect(screen.queryByText("Urologie")).not.toBeInTheDocument();
+    expect(screen.getByText("+2")).toBeInTheDocument();
   });
 });

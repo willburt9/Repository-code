@@ -3,15 +3,19 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { AppLayout } from "./AppLayout";
 
+function renderLayout() {
+  return render(
+    <MemoryRouter initialEntries={["/urgences"]}>
+      <AppLayout>
+        <div>Contenu de la page</div>
+      </AppLayout>
+    </MemoryRouter>
+  );
+}
+
 describe("AppLayout", () => {
   it("affiche la navigation et le contenu enfant", () => {
-    render(
-      <MemoryRouter initialEntries={["/urgences"]}>
-        <AppLayout>
-          <div>Contenu de la page</div>
-        </AppLayout>
-      </MemoryRouter>
-    );
+    renderLayout();
 
     expect(screen.getByText("Urgences")).toBeInTheDocument();
     expect(screen.getByText("Hôpitaux")).toBeInTheDocument();
