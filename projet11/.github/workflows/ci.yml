@@ -1,13 +1,17 @@
-name: Test CI
+name: CI
 
-on: [push]
+on:
+  push:
+  - Develop
+  pull_request:
+  - Develop
 
 jobs:
-  hello:
+  backend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Vérifier que ça tourne
-        run: echo "GitHub Actions fonctionne bien !"
-      - name: Lister les fichiers du repo
-        run: ls -la
+    - uses: actions/checkout@v4
+    - name: Vérifier que ça tourne
+      run: echo "GitHub Actions fonctionne bien !"
+    - name: Lister les fichiers du repo
+      run: ls -la
