@@ -99,7 +99,7 @@ jobs:
   # CYPRESS
   ############################################################
 
-    cypress:
+  cypress:
     name: Cypress - E2E
     runs-on: ubuntu-latest
 
