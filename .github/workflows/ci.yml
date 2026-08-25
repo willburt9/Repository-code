@@ -393,3 +393,45 @@ jobs:
             projet11/backend.log
             projet11/frontend.log
           if-no-files-found: ignore
+
+  ############################################################
+  # SEMANTIC-RELEASE
+  ############################################################
+  semantic-release:
+    name: Semantic Release
+    needs:
+      - backend
+      - frontend
+      - cypress
+
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' ||
+       github.ref == 'refs/heads/develop')
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Semantic Release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
