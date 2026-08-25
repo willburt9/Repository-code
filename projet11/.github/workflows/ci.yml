@@ -1,13 +1,13 @@
-name: CI Test
+name: Test CI
 
-on:
-  push:
-  workflow_dispatch:
+on: [push]
 
 jobs:
-  test:
+  hello:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Test
-        run: echo "GitHub Actions fonctionne"
+      - uses: actions/checkout@v4
+      - name: Vérifier que ça tourne
+        run: echo "GitHub Actions fonctionne bien !"
+      - name: Lister les fichiers du repo
+        run: ls -la
