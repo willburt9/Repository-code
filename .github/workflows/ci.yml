@@ -133,43 +133,28 @@ jobs:
       # GraphHopper
       ########################################################
 
-      - name: Verify GraphHopper files
+      - name: Verify GraphHopper
         working-directory: projet11
         run: |
-          echo "===== GraphHopper directory ====="
+          echo "===== GraphHopper ====="
           ls -lh GraphHopper/
 
-          echo "===== GraphHopper JAR ====="
-          ls -lh GraphHopper/graphhopper-web-11.0.jar
-
-          echo "===== GraphHopper config ====="
-          ls -lh GraphHopper/config.yml
-
-          echo "===== OpenStreetMap data ====="
+          echo "===== OSM file ====="
           ls -lh GraphHopper/ile-de-france-260810.osm.pbf
 
-      - name: Display GraphHopper configuration
-        working-directory: projet11
-        run: |
-          echo "===== config.yml ====="
-          cat GraphHopper/config.yml
-
       - name: Start GraphHopper
-        working-directory: projet11
+        working-directory: projet11/GraphHopper
         run: |
-          echo "===== Java version ====="
-          java -version
-
           echo "===== Starting GraphHopper ====="
 
-          java -Xmx4G \
-            -jar GraphHopper/graphhopper-web-11.0.jar \
-            server GraphHopper/config.yml \
-            > graphhopper.log 2>&1 &
+          nohup java -Xmx4G \
+            -jar graphhopper-web-11.0.jar \
+            server config.yml \
+            > ../graphhopper.log 2>&1 &
 
-          echo $! > graphhopper.pid
+          echo $! > ../graphhopper.pid
 
-          echo "GraphHopper PID: $(cat graphhopper.pid)"
+          echo "GraphHopper PID: $(cat ../graphhopper.pid)"
 
       - name: Wait for GraphHopper
         working-directory: projet11
@@ -179,21 +164,15 @@ jobs:
           for i in {1..90}; do
 
             if ! kill -0 $(cat graphhopper.pid) 2>/dev/null; then
-              echo ""
               echo "❌ GraphHopper s'est arrêté."
               echo ""
               echo "===== LOGS GRAPHHOPPER ====="
               cat graphhopper.log || true
-              echo ""
-              echo "===== PROCESS JAVA ====="
-              ps aux | grep java || true
               exit 1
             fi
 
             if curl -sf http://localhost:8989/ > /dev/null; then
-              echo ""
               echo "✅ GraphHopper est démarré."
-              echo "Port : 8989"
               exit 0
             fi
 
@@ -201,15 +180,10 @@ jobs:
             sleep 2
           done
 
-          echo ""
           echo "❌ GraphHopper n'a pas démarré après 3 minutes."
           echo ""
           echo "===== LOGS GRAPHHOPPER ====="
           cat graphhopper.log || true
-
-          echo ""
-          echo "===== PROCESS JAVA ====="
-          ps aux | grep java || true
 
           exit 1
 
