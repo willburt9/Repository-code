@@ -2,13 +2,11 @@ name: CI
 
 on:
   push:
-    branches:
-    - main
-    - Develop
+
   pull_request:
     branches:
-    - main
-    - Develop
+      - main
+      - Develop
 
 jobs:
 
@@ -24,15 +22,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Verify project structure
+        run: |
+          pwd
+          ls -la
+          echo "===== mvnw ====="
+          ls -la mvnw
+          echo "===== pom.xml ====="
+          ls -la pom.xml
+
       - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
-          cache: maven
 
       - name: Make Maven wrapper executable
-        run: chmod +x mvnw
+        run: chmod +x ./mvnw
 
       - name: Run tests and JaCoCo
         run: ./mvnw clean verify
@@ -52,31 +58,36 @@ jobs:
     name: Frontend - Tests & Build
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: frontend
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Verify frontend
+        run: |
+          pwd
+          ls -la frontend
+          ls -la frontend/package.json
+          ls -la frontend/package-lock.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
+        working-directory: frontend
         run: npm ci
 
       - name: Run tests
+        working-directory: frontend
         run: npm run test:run
 
       - name: Generate coverage
+        working-directory: frontend
         run: npm run test:coverage
 
       - name: Build frontend
+        working-directory: frontend
         run: npm run build
 
 
@@ -106,11 +117,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Make Maven wrapper executable
-        run: chmod +x mvnw
+        run: chmod +x ./mvnw
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -120,6 +129,12 @@ jobs:
       # GraphHopper
       ########################################################
 
+      - name: Verify GraphHopper
+        run: |
+          ls -la GraphHopper
+          ls -la GraphHopper/graphhopper-web-11.0.jar
+          ls -la GraphHopper/config.yml
+
       - name: Start GraphHopper
         run: |
           nohup java -jar GraphHopper/graphhopper-web-11.0.jar \
@@ -127,7 +142,8 @@ jobs:
             > graphhopper.log 2>&1 &
 
       - name: Wait for GraphHopper
-        run: npx --yes wait-on http://localhost:8989
+        working-directory: frontend
+        run: npx wait-on http://localhost:8989
 
       ########################################################
       # Spring Boot
@@ -139,10 +155,11 @@ jobs:
             > backend.log 2>&1 &
 
       - name: Wait for Spring Boot
-        run: npx --yes wait-on http://localhost:8080/actuator/health
+        working-directory: frontend
+        run: npx wait-on http://localhost:8080/actuator/health
 
       ########################################################
-      # Frontend React / Vite
+      # Frontend
       ########################################################
 
       - name: Start frontend
@@ -152,7 +169,8 @@ jobs:
             > frontend.log 2>&1 &
 
       - name: Wait for frontend
-        run: npx --yes wait-on http://localhost:5173
+        working-directory: frontend
+        run: npx wait-on http://localhost:5173
 
       ########################################################
       # Cypress
@@ -163,10 +181,10 @@ jobs:
         run: npx cypress run
 
       ########################################################
-      # Logs en cas d'échec
+      # Logs
       ########################################################
 
-      - name: Display application logs
+      - name: Display logs
         if: failure()
         run: |
           echo "===== GraphHopper ====="
@@ -179,7 +197,7 @@ jobs:
           cat frontend/frontend.log || true
 
       ########################################################
-      # Cypress artifacts
+      # Artifacts
       ########################################################
 
       - name: Upload Cypress screenshots
