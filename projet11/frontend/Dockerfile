@@ -10,6 +10,10 @@ FROM node:22-alpine AS build
 
 WORKDIR /projet11
 
+# URL de l'API fournie lors du build
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
 # Copie des fichiers de dépendances
 COPY package*.json ./
 
