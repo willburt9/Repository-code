@@ -479,28 +479,6 @@ jobs:
 
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-
-      ##########################################################
-      # DOWNLOAD BACKEND JAR
-      ##########################################################
-
-      - name: Download backend JAR
-        uses: actions/download-artifact@v5
-        with:
-          name: backend-jar
-          path: projet11/target
-
-
-      ##########################################################
-      # VERIFY BACKEND JAR
-      ##########################################################
-
-      - name: Verify backend JAR
-        run: |
-          echo "===== Backend JAR ====="
-          ls -lh projet11/target/
-
-
       ##########################################################
       # LOGIN GHCR
       ##########################################################
