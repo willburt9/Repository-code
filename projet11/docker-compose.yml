@@ -1,0 +1,39 @@
+services:
+
+  # ==========================================================
+  # GRAPHHOPPER
+  # ==========================================================
+
+  graphhopper:
+    image: ghcr.io/willburt9/projet11-graphhopper:1.0.0
+    container_name: graphhopper
+    ports:
+      - "8989:8989"
+
+
+  # ==========================================================
+  # BACKEND
+  # ==========================================================
+
+  backend:
+    image: ghcr.io/willburt9/projet11-backend:latest
+    container_name: projet11-backend
+    ports:
+      - "8080:8080"
+    environment:
+      GRAPHHOPPER_API_URL: http://graphhopper:8989
+    depends_on:
+      - graphhopper
+
+
+  # ==========================================================
+  # FRONTEND
+  # ==========================================================
+
+  frontend:
+    image: ghcr.io/willburt9/projet11-frontend:latest
+    container_name: projet11-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
