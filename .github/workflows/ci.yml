@@ -519,7 +519,8 @@ jobs:
           file: ./projet11/frontend/Dockerfile
 
           push: true
-
+          build-args: |
+            VITE_API_BASE_URL=http://localhost:8080
           tags: |
             ghcr.io/${{ github.repository_owner }}/projet11-frontend:${{ steps.version.outputs.version }}
             ghcr.io/${{ github.repository_owner }}/projet11-frontend:latest
