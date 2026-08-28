@@ -1188,8 +1188,8 @@ La chaîne complète de livraison est :
 
 # 34. Documentation complémentaire
 
-* [README Backend](./README-BACKEND.md)
-* [README Frontend](./frontend/README.md)
+* [README Backend](./ReadMe-backend.md)
+* [README Frontend](./frontend/ReadMe.md)
 * [Documentation Spring Boot](https://spring.io/projects/spring-boot)
 * [Documentation React](https://react.dev/)
 * [Documentation Vite](https://vite.dev/)
