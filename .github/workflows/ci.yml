@@ -435,3 +435,114 @@ jobs:
         run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  ############################################################
+  # DOCKER / GHCR
+  ############################################################
+
+  docker:
+    name: Docker - Build & Push Images
+    runs-on: ubuntu-latest
+
+    needs:
+      - semantic-release
+
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/Develop')
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      ##########################################################
+      # CHECKOUT
+      ##########################################################
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+
+      ##########################################################
+      # GET VERSION
+      ##########################################################
+
+      - name: Get version
+        id: version
+        shell: bash
+        run: |
+          VERSION=$(git describe --tags --abbrev=0)
+
+          VERSION=${VERSION#v}
+
+          echo "Version detected: $VERSION"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+
+      ##########################################################
+      # DOWNLOAD BACKEND JAR
+      ##########################################################
+
+      - name: Download backend JAR
+        uses: actions/download-artifact@v5
+        with:
+          name: backend-jar
+          path: projet11/target
+
+
+      ##########################################################
+      # VERIFY BACKEND JAR
+      ##########################################################
+
+      - name: Verify backend JAR
+        run: |
+          echo "===== Backend JAR ====="
+          ls -lh projet11/target/
+
+
+      ##########################################################
+      # LOGIN GHCR
+      ##########################################################
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+
+      ##########################################################
+      # BACKEND IMAGE
+      ##########################################################
+
+      - name: Build and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./projet11
+          file: ./projet11/Dockerfile
+
+          push: true
+
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/projet11-backend:${{ steps.version.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/projet11-backend:latest
+
+
+      ##########################################################
+      # FRONTEND IMAGE
+      ##########################################################
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./projet11/frontend
+          file: ./projet11/frontend/Dockerfile
+
+          push: true
+
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/projet11-frontend:${{ steps.version.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/projet11-frontend:latest
