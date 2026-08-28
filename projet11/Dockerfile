@@ -2,16 +2,35 @@
 # Backend - Projet 11
 # ============================================================
 
-FROM eclipse-temurin:21-jre
+# ------------------------------------------------------------
+# Étape 1 : Build
+# ------------------------------------------------------------
 
-# Répertoire de travail dans le conteneur
+FROM eclipse-temurin:21-jdk AS build
+
 WORKDIR /projet11
 
-# Copie du JAR produit par Maven
-COPY target/*.jar app.jar
+COPY pom.xml .
+COPY mvnw .
+COPY .mvn .mvn
 
-# Port HTTP Spring Boot
+RUN chmod +x mvnw
+RUN ./mvnw dependency:go-offline -B
+
+COPY src src
+
+RUN ./mvnw clean package -DskipTests
+
+# ------------------------------------------------------------
+# Étape 2
+# ------------------------------------------------------------
+
+FROM eclipse-temurin:21-jre
+
+WORKDIR /projet11
+
+COPY --from=build /projet11/target/*.jar app.jar
+
 EXPOSE 8080
 
-# Démarrage de l'application
 ENTRYPOINT ["java", "-jar", "app.jar"]

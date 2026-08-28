@@ -54,6 +54,16 @@ jobs:
           name: jacoco-report
           path: projet11/target/site/jacoco/
 
+      ##########################################################
+      # UPLOAD JAR FOR DOCKER JOB
+      ##########################################################
+
+      - name: Upload backend JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: projet11/target/*.jar
+          if-no-files-found: error
 
   ############################################################
   # FRONTEND
