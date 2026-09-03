@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--
+        Journal d'audit métier : un fichier PAR JOUR (rotation à minuit),
+        conservé 90 jours. Contient uniquement les événements de recommandation
+        et de réservation (logger "AUDIT" ci-dessous), pas le bruit technique
+        Spring/Tomcat.
+    -->
+    <appender name="AUDIT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/audit.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/audit-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!--
+        Logger dédié aux événements métier, utilisé via AuditLog.LOGGER dans
+        les controllers et le GlobalExceptionHandler. additivity="false" pour
+        ne pas dupliquer ces lignes dans le flux racine (elles sont explicitement
+        renvoyées aussi vers la console ci-dessous, pour le confort en dev).
+    -->
+    <logger name="AUDIT" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="AUDIT_FILE"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

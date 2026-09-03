@@ -1,0 +1,39 @@
+graphhopper:
+
+  datareader.file: ile-de-france-260810.osm.pbf
+
+  graph.location: graph-cache
+
+  import.osm.ignored_highways: motorway_link
+
+  profiles:
+    - name: car
+      custom_model_files: [car.json]
+
+  profiles_ch:
+    - profile: car
+
+  graph.encoded_values: |
+    car_access,
+    car_average_speed,
+    country,
+    road_class,
+    roundabout,
+    max_speed,
+    road_environment
+
+  prepare.min_network_size: 200
+
+  graph.dataaccess.default_type: RAM
+
+server:
+
+  application_connectors:
+    - type: http
+      port: 8989
+      bind_host: 0.0.0.0
+
+  admin_connectors:
+    - type: http
+      port: 8990
+      bind_host: 0.0.0.0
